@@ -1,7 +1,8 @@
-name: ImageOnMap
+name: ${project.name}
 main: fr.moribus.imageonmap.ImageOnMap
-version: 2.7-P2
+version: '${minecraft.plugin.version}'
 load: POSTWORLD
+description: ${project.description}
 commands:
    tomap:
       description: render an image in a map
