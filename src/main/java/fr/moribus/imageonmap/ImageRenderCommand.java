@@ -1,4 +1,4 @@
-package fr.moribus.ImageOnMap;
+package fr.moribus.imageonmap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

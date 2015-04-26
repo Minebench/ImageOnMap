@@ -1,4 +1,4 @@
-package fr.moribus.ImageOnMap;
+package fr.moribus.imageonmap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;

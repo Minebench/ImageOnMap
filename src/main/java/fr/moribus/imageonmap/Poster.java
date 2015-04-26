@@ -1,4 +1,4 @@
-package fr.moribus.ImageOnMap;
+package fr.moribus.imageonmap;
 
 import java.awt.image.BufferedImage;
 import java.util.HashMap;

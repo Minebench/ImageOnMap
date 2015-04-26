@@ -1,4 +1,4 @@
-package fr.moribus.ImageOnMap;
+package fr.moribus.imageonmap;
 
 import java.awt.Graphics2D;
 import java.awt.Image;

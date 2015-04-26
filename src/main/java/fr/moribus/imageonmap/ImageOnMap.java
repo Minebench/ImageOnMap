@@ -1,4 +1,4 @@
-package fr.moribus.ImageOnMap;
+package fr.moribus.imageonmap;
 
 import java.io.File;
 import java.io.IOException;
