@@ -1,7 +1,7 @@
 name: ImageOnMap
 main: fr.moribus.imageonmap.ImageOnMap
-version: 2.99
-
+version: 2.7-P2
+load: POSTWORLD
 commands:
    tomap:
       description: render an image in a map
@@ -9,7 +9,6 @@ commands:
    maptool:
       description: manage maps
       usage: /<command>
-      
 permissions:
     imageonmap.userender:
         description: Allows you to use /tomap

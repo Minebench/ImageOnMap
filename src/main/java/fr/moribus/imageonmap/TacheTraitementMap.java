@@ -1,194 +1,85 @@
-package fr.moribus.imageonmap;
+package fr.moribus.ImageOnMap;
 
-import fr.moribus.imageonmap.image.DownloadImageThread;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.map.MapRenderer;
+import org.bukkit.map.MapView;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public abstract class TacheTraitementMap extends BukkitRunnable
-{
-    private Player joueur;
-    private DownloadImageThread renduImg;
-    private PlayerInventory inv;
-    private ItemStack map;
-    private ImageOnMap plugin;
-    private boolean resized, renamed;
-    private ExecutorService dlImg;
-    private Future<BufferedImage> futurDlImg;
-    private int compteurExec;
+public class TacheTraitementMap extends BukkitRunnable {
+    int i;
+    Player player;
+    ImageRendererThread imageRendering;
+    PlayerInventory inv;
+    ItemStack map;
+    ImageOnMap plugin;
+    boolean resized;
 
-    protected TacheTraitementMap(URL url)
-    {
-        renduImg = new DownloadImageThread(url);
-        dlImg = Executors.newSingleThreadExecutor();
-        futurDlImg = dlImg.submit(renduImg);
-        plugin = (ImageOnMap) Bukkit.getPluginManager().getPlugin("ImageOnMap");
+    TacheTraitementMap(Player p, String url, ImageOnMap plug, boolean resize) {
+        this.i = 0;
+        this.player = p;
+        this.imageRendering = new ImageRendererThread(url, resize);
+        this.imageRendering.start();
+        this.inv = this.player.getInventory();
+        this.plugin = plug;
+        this.resized = resize;
     }
 
-    public TacheTraitementMap(Player j, URL url, boolean rs, boolean rn)
-    {
-        this(url);
-        joueur = j;
-        inv = joueur.getInventory();
-        resized = rs;
-        renamed = rn;
-    }
-
-    @Override
-    public void run()
-    {
-        compteurExec = 0;
-        if (!futurDlImg.isDone())
-        {
-            compteurExec++;
-            if (compteurExec > 20)
-            {
-                joueur.sendMessage("TIMEOUT: the render took too many time");
-                futurDlImg.cancel(true);
+    public void run() {
+        if (!this.imageRendering.getStatus()) {
+            this.i += 1;
+            if (this.imageRendering.isErroring() || this.i > 42) {
+                this.player.sendMessage("TIMEOUT: the render took too much time");
                 cancel();
             }
-        }
-        else
-        {
-            if (!futurDlImg.isCancelled())
-            {
-                cancel();
-                int nbImage = 1;
-                if (plugin.getConfig().getInt("Limit-map-by-server") != 0 && nbImage + ImgUtility.getNombreDeMaps(plugin) > plugin.getConfig().getInt("Limit-map-by-server"))
-                {
-                    joueur.sendMessage("ERROR: cannot render " + nbImage + " picture(s): the limit of maps per server would be exceeded.");
-                    return;
-                }
-                if (!joueur.hasPermission("imageonmap.nolimit"))
-                {
-                    if (plugin.getConfig().getInt("Limit-map-by-player") != 0 && nbImage + ImgUtility.getNombreDeMapsParJoueur(plugin, joueur.getName()) > plugin.getConfig().getInt("Limit-map-by-player"))
-                    {
-                        joueur.sendMessage(ChatColor.RED + "ERROR: cannot render " + nbImage + " picture(s): the limit of maps allowed for you (per player) would be exceeded.");
-                        return;
-                    }
-                }
-
-                try
-                {
-                    BufferedImage dlimg = futurDlImg.get();
-                    traiterMap(dlimg);
-                    joueur.sendMessage("Image successfuly downloaded !");
-                }
-                catch (InterruptedException ex)
-                {
-                    joueur.sendMessage(ChatColor.RED + "Download task has been interrupted unexpectedly. Check server console for details.");
-                    PluginLogger.LogError("Download task has been interrupted", ex);
-                }
-                catch (ExecutionException ex)
-                {
-                    joueur.sendMessage(ChatColor.RED + "Download failed : " + ex.getMessage());
-                    joueur.sendMessage(ChatColor.RED + "Please check your URL");
-                }
-                catch(IOException ex)
-                {
-                    joueur.sendMessage(ChatColor.RED + "Failed to process the image. Check server console for details.");
-                    PluginLogger.LogError("Image processing failed", ex);
-                }
-                
+        } else {
+            cancel();
+            int nbImage = this.imageRendering.getImg().length;
+            if ((this.plugin.getConfig().getInt("Limit-map-by-server") != 0) && (nbImage + ImgUtility.getMapCount(this.plugin) > this.plugin.getConfig().getInt("Limit-map-by-server"))) {
+                this.player.sendMessage("ERROR: cannot render " + nbImage + " picture(s): the limit of maps per server would be exceeded.");
+                return;
             }
-            else
-            {
-                joueur.sendMessage(ChatColor.RED + "An error occured. See the console for details");
+            if ((this.plugin.getConfig().getInt("Limit-map-by-player") != 0) && (nbImage + ImgUtility.getNombreDeMapsParJoueur(this.plugin, this.player.getName()) > this.plugin.getConfig().getInt("Limit-map-by-player"))) {
+                this.player.sendMessage(ChatColor.RED + "ERROR: cannot render " + nbImage + " picture(s): the limit of maps allowed for you (per player) would be exceeded.");
+                return;
             }
+            ArrayList<ItemStack> restant = new ArrayList();
+            for (int i = 0; i < nbImage; i++) {
+                MapView map;
+                if ((nbImage == 1) && (this.player.getItemInHand().getType() == Material.MAP)) {
+                    map = Bukkit.getMap(this.player.getItemInHand().getDurability());
+                } else {
+                    map = Bukkit.createMap(Bukkit.getServer().getWorlds().get(0));
+                }
+                ImageRendererThread.emptyRenderers(map);
+                map.addRenderer(new Renderer(this.imageRendering.getImg()[i]));
+                this.map = new ItemStack(Material.MAP, 1, map.getId());
+                if (nbImage > 1) {
+                    ItemMeta meta = this.map.getItemMeta();
+                    meta.setDisplayName("Map (" +  this.imageRendering.getNumeroMap().get(i) + ")");
+                    this.map.setItemMeta(meta);
+                }
+                if ((nbImage == 1) && (this.player.getItemInHand().getType() == Material.MAP)) {
+                    this.player.setItemInHand(this.map);
+                } else {
+                    ImgUtility.addMap(this.map, this.inv, restant);
+                }
+                SavedMap svg = new SavedMap(this.plugin, this.player.getName(), map.getId(), this.imageRendering.getImg()[i],  map.getWorld().getName());
+                svg.saveMap();
+                this.player.sendMap(map);
+            }
+            if (!restant.isEmpty()) {
+                this.player.sendMessage(restant.size() + " maps can't be place in your inventory. Please make free space in your inventory and run " + ChatColor.GOLD + "/maptool getrest");
+            }
+            this.plugin.setRemainingMaps(this.player.getName(), restant);
+            this.player.sendMessage("Render finished");
         }
     }
-
-    public abstract void traiterMap(BufferedImage img) throws IOException;
-
-    protected Player getJoueur()
-    {
-        return joueur;
-    }
-
-    protected void setJoueur(Player joueur)
-    {
-        this.joueur = joueur;
-    }
-
-    protected DownloadImageThread getRenduImg()
-    {
-        return renduImg;
-    }
-
-    protected void setRenduImg(DownloadImageThread renduImg)
-    {
-        this.renduImg = renduImg;
-    }
-
-    protected PlayerInventory getInv()
-    {
-        return inv;
-    }
-
-    protected void setInv(PlayerInventory inv)
-    {
-        this.inv = inv;
-    }
-
-    protected ItemStack getMap()
-    {
-        return map;
-    }
-
-    protected void setMap(ItemStack map)
-    {
-        this.map = map;
-    }
-
-    protected ImageOnMap getPlugin()
-    {
-        return plugin;
-    }
-
-    protected void setPlugin(ImageOnMap plugin)
-    {
-        this.plugin = plugin;
-    }
-
-    protected boolean isResized()
-    {
-        return resized;
-    }
-
-    protected void setResized(boolean resized)
-    {
-        this.resized = resized;
-    }
-
-    protected boolean isRenamed()
-    {
-        return renamed;
-    }
-
-    protected void setRenamed(boolean renamed)
-    {
-        this.renamed = renamed;
-    }
-
-    protected int getCompteurExec()
-    {
-        return compteurExec;
-    }
-
-    protected void setCompteurExec(int compteurExec)
-    {
-        this.compteurExec = compteurExec;
-    }
-
 }

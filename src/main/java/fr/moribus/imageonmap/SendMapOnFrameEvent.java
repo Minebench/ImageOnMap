@@ -1,57 +1,35 @@
-package fr.moribus.imageonmap;
+package fr.moribus.ImageOnMap;
 
-import java.util.ArrayList;
-
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.map.MapView;
 
-import fr.moribus.imageonmap.map.SingleMap;
-
-public class SendMapOnFrameEvent implements Listener
-{
-
+public class SendMapOnFrameEvent implements Listener {
     ImageOnMap plugin;
-    Chunk chunk;
-    Entity[] entites;
-    ItemFrame frame;
 
-    SendMapOnFrameEvent(ImageOnMap plug)
-    {
-        plugin = plug;
+    SendMapOnFrameEvent(ImageOnMap plug) {
+        this.plugin = plug;
     }
 
     @EventHandler
-    public void onChunkLoad(ChunkLoadEvent event)
-    {
-        chunk = event.getChunk();
-        entites = chunk.getEntities().clone();
-        for (Entity entite : entites)
-        {
-            if (entite instanceof ItemFrame)
-            {
-                ArrayList<Short> ListeId = plugin.mapChargee;
-                frame = (ItemFrame) entite;
-                ItemStack stack = frame.getItem();
-                if (stack.getType() == Material.MAP && !ListeId.contains(stack.getDurability()))
-                {
-                    try
-                    {
-                        new SingleMap(stack.getDurability()).load();
-                    }
-                    catch (Exception e)
-                    {
-                        PluginLogger.LogWarning("Could not send frame map", e);
-                    }
-
+    public void onChunkLoad(ChunkLoadEvent event) {
+        for (Entity e : event.getChunk().getEntities())
+            if (e instanceof ItemFrame) {
+                ItemStack stack = ((ItemFrame) e).getItem();
+                if (stack.getType() == Material.MAP) {
+                    MapView map = Bukkit.getMap(stack.getDurability());
+                    for (Player p : this.plugin.getServer().getOnlinePlayers())
+                        p.sendMap(map);
                 }
-
             }
-        }
     }
 }
