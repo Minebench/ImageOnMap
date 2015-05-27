@@ -1,6 +1,7 @@
 package fr.moribus.imageonmap;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -63,7 +64,9 @@ public class TacheTraitementMap extends BukkitRunnable {
                 this.map = new ItemStack(Material.MAP, 1, map.getId());
                 if (nbImage > 1) {
                     ItemMeta meta = this.map.getItemMeta();
-                    meta.setDisplayName("Map (" +  this.imageRendering.getNumeroMap().get(i) + ")");
+                    List<String> lore = meta.getLore();
+                    lore.add(this.imageRendering.getNumeroMap().get(i));
+                    meta.setLore(lore);
                     this.map.setItemMeta(meta);
                 }
                 if ((nbImage == 1) && (this.player.getItemInHand().getType() == Material.MAP)) {
