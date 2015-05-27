@@ -65,6 +65,9 @@ public class TacheTraitementMap extends BukkitRunnable {
                 if (nbImage > 1) {
                     ItemMeta meta = this.map.getItemMeta();
                     List<String> lore = meta.getLore();
+                    if(lore == null) {
+                        lore = new ArrayList<String>();
+                    }
                     lore.add(this.imageRendering.getNumeroMap().get(i));
                     meta.setLore(lore);
                     this.map.setItemMeta(meta);
