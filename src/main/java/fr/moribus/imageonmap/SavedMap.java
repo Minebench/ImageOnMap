@@ -33,7 +33,6 @@ public class SavedMap {
     SavedMap(ImageOnMap plug, short id) {
         this.idMap = id;
         this.plugin = plug;
-        Set<String> cle = this.plugin.getCustomConfig().getKeys(false);
         boolean found = false;
         this.nomImg = "map" + id;
         List<String> mapdata = this.plugin.getCustomConfig().getStringList(this.nomImg);

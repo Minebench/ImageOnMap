@@ -53,15 +53,35 @@ public final class ImageOnMap extends JavaPlugin {
         Set<String> cle = getCustomConfig().getKeys(false);
         int nbMap = 0;
         int nbErr = 0;
-        for (String s : cle) {
-            if (this.getCustomConfig().getStringList(s).size() >= 3) {
-                SavedMap map = new SavedMap(this, Short.valueOf(this.getCustomConfig().getStringList(s).get(0)));
-                if (map.loadMap()) {
-                    nbMap++;
-                } else {
-                    nbErr++;
+        File dir = new File(getDataFolder(),"Image");
+        File[] directoryListing = dir.listFiles();
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                if(child.getName().startsWith("map")) {
+                    try {
+                        String idStr = child.getName().substring(3, child.getName().lastIndexOf('.'));
+                        short id = Short.parseShort(idStr);
+                        SavedMap map = new SavedMap(this, id);
+                        if(map.loadMap()) {
+                            nbMap++;
+                        } else {
+                            nbErr++;
+                        }
+                    } catch (NumberFormatException e) {
+                        getLogger().warning(child.getName().substring(3) + " is not a valid map id? (File " + child.getName() + ")");
+                        nbErr++;
+                    } catch (IndexOutOfBoundsException e) {
+                        getLogger().warning(child.getName() + " is not a valid map image?");
+                        nbErr++;
+                    }
                 }
+                // Do something with child
             }
+        } else {
+            // Handle the case where dir is not really a directory.
+            // Checking dir.isDirectory() above would not be sufficient
+            // to avoid race conditions with another process that deletes
+            // directories.
         }
         this.getLogger().info(nbMap + " maps were loaded");
         if (nbErr != 0) {
