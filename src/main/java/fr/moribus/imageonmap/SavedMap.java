@@ -18,10 +18,10 @@ public class SavedMap {
     String nomImg;
     String nomJoueur;
     String nomMonde;
-    short idMap;
+    int idMap;
     BufferedImage image;
 
-    SavedMap(ImageOnMap plug, String nomJ, short id, BufferedImage img, String nomM) {
+    SavedMap(ImageOnMap plug, String nomJ, int id, BufferedImage img, String nomM) {
         this.plugin = plug;
         this.nomJoueur = nomJ;
         this.idMap = id;
@@ -30,7 +30,7 @@ public class SavedMap {
         this.nomMonde = nomM;
     }
 
-    SavedMap(ImageOnMap plug, short id) {
+    SavedMap(ImageOnMap plug, int id) {
         this.idMap = id;
         this.plugin = plug;
         boolean found = false;

@@ -10,8 +10,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <build.number>${buildNumber}</build.number>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <minecraft.plugin.version>${project.version} ${buildDescription}</minecraft.plugin.version>
     </properties>
     <repositories>
         <repository>
@@ -25,7 +26,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.8-R0.1-SNAPSHOT</version>
+            <version>1.13.2-R0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <profiles>
@@ -38,7 +39,7 @@
             </activation>
             <properties>
                 <buildNumber>0</buildNumber>
-                <buildDescription>(manually compiled)</buildDescription>
+                <buildDescription>(compiled ${maven.build.timestamp})</buildDescription>
             </properties>
         </profile>
         <profile>
@@ -50,7 +51,7 @@
             </activation>
             <properties>
                 <buildNumber>${env.BUILD_NUMBER}</buildNumber>
-                <buildDescription>b#${env.BUILD_NUMBER}</buildDescription>
+                <buildDescription>b${env.BUILD_NUMBER}</buildDescription>
             </properties>
         </profile>
     </profiles>
@@ -62,27 +63,5 @@
                 <directory>${project.basedir}/src/main/resources</directory>
             </resource>
         </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.9.1</version>
-                <executions>
-                    <execution>
-                        <id>regex-property</id>
-                        <goals>
-                            <goal>regex-property</goal>
-                        </goals>
-                        <configuration>
-                            <name>minecraft.plugin.version</name>
-                            <value>${project.version} ${buildDescription}</value>
-                            <regex>[0-9\.]+ \(.+\)</regex>
-                            <replacement>${project.version}</replacement>
-                            <failIfNoMatch>false</failIfNoMatch>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 </project>

@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapView;
 
 public class MapToolCommand
@@ -58,7 +59,11 @@ public class MapToolCommand
                 this.player.sendMessage("Your inventory is full, you can't take the map !");
                 return true;
             }
-            this.inv.addItem(new ItemStack[]{new ItemStack(Material.MAP, 1, this.map.getId())});
+            ItemStack item = new ItemStack(Material.FILLED_MAP);
+            MapMeta meta = (MapMeta) item.getItemMeta();
+            meta.setMapView(this.map);
+            item.setItemMeta(meta);
+            this.inv.addItem(item);
             this.player.sendMap(this.map);
             this.player.sendMessage("Map " + ChatColor.ITALIC + this.id + ChatColor.RESET + " was added to your inventory.");
 

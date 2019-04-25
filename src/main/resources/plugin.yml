@@ -1,6 +1,7 @@
 name: ${project.name}
 main: fr.moribus.imageonmap.ImageOnMap
 version: '${minecraft.plugin.version}'
+api-version: 1.13
 load: POSTWORLD
 description: ${project.description}
 commands:

@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.map.MapRenderer;
+import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapView;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -54,25 +54,26 @@ public class TacheTraitementMap extends BukkitRunnable {
             ArrayList<ItemStack> restant = new ArrayList();
             for (int i = 0; i < nbImage; i++) {
                 MapView map;
-                if ((nbImage == 1) && (this.player.getItemInHand().getType() == Material.MAP)) {
-                    map = Bukkit.getMap(this.player.getItemInHand().getDurability());
+                if ((nbImage == 1) && (this.player.getItemInHand().getType() == Material.FILLED_MAP)) {
+                    map = ((MapMeta) this.player.getItemInHand().getItemMeta()).getMapView();
                 } else {
                     map = Bukkit.createMap(Bukkit.getServer().getWorlds().get(0));
                 }
                 ImageRendererThread.emptyRenderers(map);
                 map.addRenderer(new Renderer(this.imageRendering.getImg()[i]));
-                this.map = new ItemStack(Material.MAP, 1, map.getId());
+                this.map = new ItemStack(Material.FILLED_MAP);
+                MapMeta meta = (MapMeta) this.map.getItemMeta();
+                meta.setMapView(map);
                 if (nbImage > 1) {
-                    ItemMeta meta = this.map.getItemMeta();
                     List<String> lore = meta.getLore();
                     if(lore == null) {
                         lore = new ArrayList<String>();
                     }
                     lore.add(this.imageRendering.getNumeroMap().get(i));
                     meta.setLore(lore);
-                    this.map.setItemMeta(meta);
                 }
-                if ((nbImage == 1) && (this.player.getItemInHand().getType() == Material.MAP)) {
+                this.map.setItemMeta(meta);
+                if ((nbImage == 1) && (this.player.getItemInHand().getType() == Material.FILLED_MAP)) {
                     this.player.setItemInHand(this.map);
                 } else {
                     ImgUtility.addMap(this.map, this.inv, restant);
