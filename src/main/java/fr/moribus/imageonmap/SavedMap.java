@@ -16,8 +16,8 @@ import org.bukkit.map.MapView;
 public class SavedMap {
     ImageOnMap plugin;
     String nomImg;
-    String nomJoueur;
-    String nomMonde;
+    String nomJoueur = "";
+    String nomMonde = "";
     int idMap;
     BufferedImage image;
 
@@ -36,15 +36,15 @@ public class SavedMap {
         boolean found = false;
         this.nomImg = "map" + id;
         List<String> mapdata = this.plugin.getCustomConfig().getStringList(this.nomImg);
-        if(mapdata.size() >= 3 && Short.valueOf(mapdata.get(0)) == id) {
-            found = true;
+        if(mapdata.size() >= 3 && Integer.valueOf(mapdata.get(0)) == id) {
             this.nomJoueur = mapdata.get(2);
             this.nomMonde = mapdata.get(3);
-            try {
-                this.image = ImageIO.read(new File(this.plugin.getDataFolder() + File.separator + "Image", this.nomImg + ".png"));
-            } catch (IOException e) {
-                System.out.println("Image " + this.nomImg + ".png doesn't exists in Image directory.");
-            }
+        }
+        try {
+            this.image = ImageIO.read(new File(this.plugin.getDataFolder() + File.separator + "Image", this.nomImg + ".png"));
+            found = true;
+        } catch (IOException e) {
+            System.out.println("Image " + this.nomImg + ".png doesn't exists in Image directory.");
         }
         if (!found) {
             System.out.println("No map with the id " + id + " could be loaded");
