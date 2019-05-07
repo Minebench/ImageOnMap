@@ -1,6 +1,7 @@
 package fr.moribus.imageonmap;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,13 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapView;
 
-public class MapToolCommand
-        implements CommandExecutor {
-    short id;
-    ImageOnMap plugin;
-    MapView map;
-    Player player;
-    Inventory inv;
+public class MapToolCommand implements CommandExecutor {
+    private ImageOnMap plugin;
 
     MapToolCommand(ImageOnMap p) {
         this.plugin = p;
@@ -30,97 +26,93 @@ public class MapToolCommand
             return false;
         }
         String nomCmd = arg2;
-        this.player = ((Player) sender);
-        this.inv = this.player.getInventory();
+        Player player = ((Player) sender);
+        Inventory inv = player.getInventory();
         if (arg3.length < 1) {
-            this.player.sendMessage("Map tools usage:\n/" +
+            player.sendMessage("Map tools usage:\n/" +
                     ChatColor.GOLD + nomCmd + ChatColor.RESET + " get [id]: get the map corresponding to this id" +
                     "\n/" + ChatColor.GOLD + nomCmd + ChatColor.RESET + " delete [id]: remove the map corresponding to this id" +
                     "\n/" + ChatColor.GOLD + nomCmd + ChatColor.RESET + " list: show all ids of maps in your possession");
             return true;
         }
+        int id;
         if (arg3[0].equalsIgnoreCase("get")) {
             try {
-                this.id = Short.parseShort(arg3[1]);
+                id = Integer.parseInt(arg3[1]);
             } catch (NumberFormatException err) {
-                this.player.sendMessage("you must enter a number !");
+                player.sendMessage("you must enter a number !");
                 return true;
             }
-            this.map = ImgUtility.getMap(this.plugin, this.id);
-            if (this.map == null) {
-                if (this.player.isOp()) {
-                    this.player.sendMessage(ChatColor.RED + "Can't retrieve the map ! Check if map" + this.id + " exists in your maps.yml or if the dat file in the world folder exists");
+            MapView map = ImgUtility.getMap(this.plugin, id);
+            if (map == null) {
+                if (player.isOp()) {
+                    player.sendMessage(ChatColor.RED + "Can't retrieve the map ! Check if dat file map" + id + " in the world folder exists");
                 } else {
-                    this.player.sendMessage(ChatColor.RED + "ERROR: This map doesn't exists");
+                    player.sendMessage(ChatColor.RED + "ERROR: This map doesn't exists");
                 }
                 return true;
             }
-            if (this.inv.firstEmpty() == -1) {
-                this.player.sendMessage("Your inventory is full, you can't take the map !");
+            if (inv.firstEmpty() == -1) {
+                player.sendMessage("Your inventory is full, you can't take the map!");
                 return true;
             }
             ItemStack item = new ItemStack(Material.FILLED_MAP);
             MapMeta meta = (MapMeta) item.getItemMeta();
-            meta.setMapView(this.map);
+            meta.setMapView(map);
             item.setItemMeta(meta);
-            this.inv.addItem(item);
-            this.player.sendMap(this.map);
-            this.player.sendMessage("Map " + ChatColor.ITALIC + this.id + ChatColor.RESET + " was added to your inventory.");
+            inv.addItem(item);
+            player.sendMap(map);
+            player.sendMessage("Map " + ChatColor.ITALIC + id + ChatColor.RESET + " was added to your inventory.");
 
             return true;
         }
         if (arg3[0].equalsIgnoreCase("delete")) {
-            if (!this.player.hasPermission("imageonmap.usermmap")) {
-                this.player.sendMessage("You are not allowed to delete map !");
+            if (!player.hasPermission("imageonmap.usermmap")) {
+                player.sendMessage("You are not allowed to delete map !");
                 return true;
             }
             if (arg3.length <= 1) {
-                if (this.player.getItemInHand().getType() == Material.MAP) {
-                    this.id = this.player.getItemInHand().getDurability();
+                if (player.getItemInHand().getType() == Material.FILLED_MAP) {
+                    id = ((MapMeta) player.getItemInHand().getItemMeta()).getMapId();
                 } else {
-                    this.player.sendMessage(ChatColor.RED + "You must hold a map or enter an id");
+                    player.sendMessage(ChatColor.RED + "You must hold a map or enter an id");
+                    return true;
                 }
             } else {
                 try {
-                    this.id = Short.parseShort(arg3[1]);
+                    id = Integer.parseInt(arg3[1]);
                 } catch (NumberFormatException err) {
-                    this.player.sendMessage("you must enter a number !");
+                    player.sendMessage("you must enter a number !");
                     return true;
                 }
             }
-            if (ImgUtility.removeMap(this.plugin, this.id)) {
-                this.player.sendMessage("Map#" + this.id + " was deleted");
+            if (ImgUtility.removeMap(this.plugin, id)) {
+                player.sendMessage("Map#" + id + " was deleted");
                 return true;
             }
-            this.player.sendMessage(ChatColor.RED + "Can't delete Map#" + this.id + ": check the server log");
+            player.sendMessage(ChatColor.RED + "Can't delete Map#" + id + ": check the server log");
             return true;
         }
         if (arg3[0].equalsIgnoreCase("list")) {
-            String msg = "";
-            int compteur = 0;
-
-            ArrayList<String> liste = ImgUtility.getListMapByPlayer(this.plugin, this.player.getName());
-            for (; compteur < liste.size(); compteur++) {
-                msg = msg + (String) liste.get(compteur) + " ";
-            }
-            this.player.sendMessage(msg +
-                    "\nYou have rendered " + ChatColor.DARK_PURPLE + (compteur + 1) + ChatColor.RESET + " pictures");
+            List<String> liste = ImgUtility.getListMapByPlayer(this.plugin, player.getName());
+            player.sendMessage(String.join(" ", liste) +
+                    "\nYou have rendered " + ChatColor.DARK_PURPLE + liste.size() + ChatColor.RESET + " pictures");
         } else if (arg3[0].equalsIgnoreCase("getrest")) {
-            if (this.plugin.getRemainingMaps(this.player.getName()) == null) {
-                this.player.sendMessage("All maps have already be placed in your inventory");
+            if (this.plugin.getRemainingMaps(player.getName()) == null) {
+                player.sendMessage("All maps have already be placed in your inventory");
                 return true;
             }
-            ArrayList<ItemStack> reste = this.plugin.getRemainingMaps(this.player.getName());
-            ArrayList<ItemStack> restant = new ArrayList<ItemStack>();
+            List<ItemStack> reste = this.plugin.getRemainingMaps(player.getName());
+            List<ItemStack> restant = new ArrayList<>();
             for (int i = 0; i < reste.size(); i++) {
-                ImgUtility.addMap((ItemStack) reste.get(i), this.inv, restant);
+                ImgUtility.addMap(reste.get(i), inv, restant);
             }
             if (restant.isEmpty()) {
-                this.plugin.removeRemaingMaps(this.player.getName());
-                this.player.sendMessage("All maps have been placed in your inventory");
+                this.plugin.removeRemaingMaps(player.getName());
+                player.sendMessage("All maps have been placed in your inventory");
             } else {
-                this.plugin.setRemainingMaps(this.player.getName(), restant);
-                this.player.sendMessage(restant.size() + " maps can't be placed in your inventory. Please run " + ChatColor.GOLD + "/maptool getrest again");
+                this.plugin.setRemainingMaps(player.getName(), restant);
+                player.sendMessage(restant.size() + " maps can't be placed in your inventory. Please run " + ChatColor.GOLD + "/maptool getrest again");
             }
         }
         return true;

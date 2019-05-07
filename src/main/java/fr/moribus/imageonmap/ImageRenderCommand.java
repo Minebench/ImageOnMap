@@ -7,11 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class ImageRenderCommand implements CommandExecutor {
-    Player player;
-    boolean renderName;
-    boolean imgSvg;
-    ImageOnMap plugin;
-    boolean resize;
+    private ImageOnMap plugin;
 
     public ImageRenderCommand(ImageOnMap p) {
         this.plugin = p;
@@ -21,21 +17,21 @@ public class ImageRenderCommand implements CommandExecutor {
         if (!ImgUtility.verifyIdentity(sender)) {
             return false;
         }
-        this.player = ((Player) sender);
-        this.resize = false;
-        if (!this.player.hasPermission("imageonmap.userender")) {
-            this.player.sendMessage("You are not allowed to use this command ( " + command.getName() + " )!");
+        Player player = ((Player) sender);
+        boolean resize = false;
+        if (!player.hasPermission("imageonmap.userender")) {
+            player.sendMessage("You are not allowed to use this command ( " + command.getName() + " )!");
             return false;
         }
         if (args.length < 1) {
-            this.player.sendMessage(ChatColor.RED + "You must enter image url");
+            player.sendMessage(ChatColor.RED + "You must enter image url");
             return false;
         }
         if ((args.length >= 2) && (args[1].equalsIgnoreCase("resize"))) {
-            this.resize = true;
+            resize = true;
         }
         String url = args[0];
-        TacheTraitementMap tache = new TacheTraitementMap(this.player, url, this.plugin, this.resize);
+        TacheTraitementMap tache = new TacheTraitementMap(player, url, this.plugin, resize);
         tache.runTaskTimer(this.plugin, 0L, 10L);
 
         return true;

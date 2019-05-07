@@ -9,19 +9,18 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapView;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class TacheTraitementMap extends BukkitRunnable {
-    int i;
-    Player player;
-    ImageRendererThread imageRendering;
-    PlayerInventory inv;
-    ItemStack map;
-    ImageOnMap plugin;
-    boolean resized;
+    private int i;
+    private Player player;
+    private ImageRendererThread imageRendering;
+    private PlayerInventory inv;
+    private ItemStack map;
+    private ImageOnMap plugin;
+    private boolean resized;
 
     TacheTraitementMap(Player p, String url, ImageOnMap plug, boolean resize) {
         this.i = 0;
@@ -51,7 +50,7 @@ public class TacheTraitementMap extends BukkitRunnable {
                 this.player.sendMessage(ChatColor.RED + "ERROR: cannot render " + nbImage + " picture(s): the limit of maps allowed for you (per player) would be exceeded.");
                 return;
             }
-            ArrayList<ItemStack> restant = new ArrayList();
+            List<ItemStack> restant = new ArrayList<>();
             for (int i = 0; i < nbImage; i++) {
                 MapView map;
                 if ((nbImage == 1) && (this.player.getItemInHand().getType() == Material.FILLED_MAP)) {
@@ -67,7 +66,7 @@ public class TacheTraitementMap extends BukkitRunnable {
                 if (nbImage > 1) {
                     List<String> lore = meta.getLore();
                     if(lore == null) {
-                        lore = new ArrayList<String>();
+                        lore = new ArrayList<>();
                     }
                     lore.add(this.imageRendering.getNumeroMap().get(i));
                     meta.setLore(lore);

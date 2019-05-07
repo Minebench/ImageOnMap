@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapView;
 
 public class SendMapOnFrameEvent implements Listener {
-    ImageOnMap plugin;
+    private ImageOnMap plugin;
 
     SendMapOnFrameEvent(ImageOnMap plug) {
         this.plugin = plug;

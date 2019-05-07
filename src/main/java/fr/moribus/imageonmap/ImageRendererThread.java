@@ -5,16 +5,15 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
-import java.util.HashMap;
+import java.util.Map;
 import javax.imageio.ImageIO;
 
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
 public class ImageRendererThread extends Thread {
-    boolean error = false;
+    private boolean error = false;
     private String URL;
-    private BufferedImage imgSrc;
     private BufferedImage[] img;
     private Poster poster;
     private boolean estPrete = false;
@@ -41,26 +40,26 @@ public class ImageRendererThread extends Thread {
         return null;
     }
 
-    public HashMap<Integer, String> getNumeroMap() {
-        return this.poster.numeroMap;
+    public Map<Integer, String> getNumeroMap() {
+        return this.poster.getNumeroMap();
     }
 
-    public Boolean getStatus() {
-        return Boolean.valueOf(this.estPrete);
+    public boolean getStatus() {
+        return this.estPrete;
     }
 
     public void run() {
         try {
-            this.imgSrc = ImageIO.read(URI.create(this.URL).toURL().openStream());
+            BufferedImage imgSrc = ImageIO.read(URI.create(this.URL).toURL().openStream());
             if (this.resized) {
                 this.img = new BufferedImage[1];
-                Image i = this.imgSrc.getScaledInstance(128, 128, 4);
+                Image i = imgSrc.getScaledInstance(128, 128, 4);
                 BufferedImage imgScaled = new BufferedImage(128, 128, 2);
                 imgScaled.getGraphics().drawImage(i, 0, 0, null);
                 this.img[0] = imgScaled;
             } else {
-                int width = this.imgSrc.getWidth();
-                int height = this.imgSrc.getHeight();
+                int width = imgSrc.getWidth();
+                int height = imgSrc.getHeight();
 
                 int tmpW = 0;
                 int tmpH = 0;
@@ -80,12 +79,12 @@ public class ImageRendererThread extends Thread {
 
                 int centerX = 0;
                 int centerY = 0;
-                centerX = (tmpW - this.imgSrc.getWidth()) / 2;
-                centerY = (tmpH - this.imgSrc.getHeight()) / 2;
+                centerX = (tmpW - imgSrc.getWidth()) / 2;
+                centerY = (tmpH - imgSrc.getHeight()) / 2;
 
                 graph.translate(centerX, centerY);
 
-                graph.drawImage(this.imgSrc, null, null);
+                graph.drawImage(imgSrc, null, null);
 
                 this.poster = new Poster(canvas);
                 this.img = this.poster.getPoster();

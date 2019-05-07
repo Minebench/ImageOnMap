@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -20,7 +20,7 @@ public final class ImageOnMap extends JavaPlugin {
     boolean dossierCree;
     private FileConfiguration customConfig = null;
     private File customConfigFile = null;
-    private HashMap<String, ArrayList<ItemStack>> cache = new HashMap();
+    private HashMap<String, List<ItemStack>> cache = new HashMap<>();
 
     public void onLoad() {
     }
@@ -115,11 +115,11 @@ public final class ImageOnMap extends JavaPlugin {
         }
     }
 
-    public ArrayList<ItemStack> getRemainingMaps(String j) {
-        return (ArrayList) this.cache.get(j);
+    public List<ItemStack> getRemainingMaps(String j) {
+        return this.cache.get(j);
     }
 
-    public void setRemainingMaps(String j, ArrayList<ItemStack> remaining) {
+    public void setRemainingMaps(String j, List<ItemStack> remaining) {
         this.cache.put(j, remaining);
     }
 

@@ -14,12 +14,12 @@ import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
 public class SavedMap {
-    ImageOnMap plugin;
-    String nomImg;
-    String nomJoueur = "";
-    String nomMonde = "";
-    int idMap;
-    BufferedImage image;
+    private ImageOnMap plugin;
+    private String nomImg;
+    private String nomJoueur = "";
+    private String nomMonde = "";
+    private int idMap;
+    private BufferedImage image;
 
     SavedMap(ImageOnMap plug, String nomJ, int id, BufferedImage img, String nomM) {
         this.plugin = plug;
@@ -51,7 +51,7 @@ public class SavedMap {
         }
     }
 
-    Boolean saveMap() {
+    boolean saveMap() {
         this.plugin.getLogger().info("Saving map " + this.idMap);
         try {
             File outputfile = new File(this.plugin.getDataFolder() + File.separator + "Image", this.nomImg + ".png");
@@ -70,7 +70,7 @@ public class SavedMap {
         return true;
     }
 
-    Boolean loadMap() {
+    boolean loadMap() {
         MapView carte = Bukkit.getMap(this.idMap);
         if (carte != null) {
             ImageRendererThread.emptyRenderers(carte);

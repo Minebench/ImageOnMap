@@ -2,17 +2,17 @@ package fr.moribus.imageonmap;
 
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Poster {
-    BufferedImage src;
-    BufferedImage[] imgDecoupe;
-    HashMap<Integer, String> numeroMap;
-    int nbPartie;
-    int nbColonne;
+    private BufferedImage src;
+    private BufferedImage[] imgDecoupe;
+    private Map<Integer, String> numeroMap;
+    private int nbColonne;
 
     Poster(BufferedImage img) {
         this.src = img;
-        this.numeroMap = new HashMap();
+        this.numeroMap = new HashMap<>();
         decoupeImg();
     }
 
@@ -22,6 +22,10 @@ public class Poster {
 
     public int getNbColonne() {
         return this.nbColonne;
+    }
+
+    public Map<Integer, String> getNumeroMap() {
+        return numeroMap;
     }
 
     private void decoupeImg() {
@@ -51,8 +55,8 @@ public class Poster {
             }
         }
         this.nbColonne = colonne;
-        this.nbPartie = (ligne * colonne);
-        this.imgDecoupe = new BufferedImage[this.nbPartie];
+        int nbPartie = (ligne * colonne);
+        this.imgDecoupe = new BufferedImage[nbPartie];
         for (int lig = 0; lig < ligne; lig++) {
             y = 0;
             if ((lig == ligne - 1) && (resteX != 0)) {

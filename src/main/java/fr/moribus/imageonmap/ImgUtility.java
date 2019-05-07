@@ -2,7 +2,8 @@ package fr.moribus.imageonmap;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -43,16 +44,16 @@ public class ImgUtility {
 
     static void creeSectionConfig(ImageOnMap plugin) {
         if (plugin.getConfig().get("Limit-map-by-server") == null) {
-            plugin.getConfig().set("Limit-map-by-server", Integer.valueOf(0));
+            plugin.getConfig().set("Limit-map-by-server", 0);
         }
         if (plugin.getConfig().get("Limit-map-by-player") == null) {
-            plugin.getConfig().set("Limit-map-by-player", Integer.valueOf(0));
+            plugin.getConfig().set("Limit-map-by-player", 0);
         }
         if (plugin.getConfig().get("collect-data") == null) {
-            plugin.getConfig().set("collect-data", Boolean.valueOf(true));
+            plugin.getConfig().set("collect-data", true);
         }
         if (plugin.getConfig().get("import-maps") == null) {
-            plugin.getConfig().set("import-maps", Boolean.valueOf(true));
+            plugin.getConfig().set("import-maps", true);
         }
         plugin.saveConfig();
     }
@@ -72,27 +73,27 @@ public class ImgUtility {
         int nombre = 0;
         Set<String> cle = plugin.getCustomConfig().getKeys(false);
         for (String s : cle) {
-            if ((plugin.getCustomConfig().getStringList(s).size() >= 3) && (((String) plugin.getCustomConfig().getStringList(s).get(2)).contentEquals(pseudo))) {
+            if ((plugin.getCustomConfig().getStringList(s).size() >= 3) && ((plugin.getCustomConfig().getStringList(s).get(2)).contentEquals(pseudo))) {
                 nombre++;
             }
         }
         return nombre;
     }
 
-    static boolean estDansFichier(ImageOnMap plugin, short id) {
+    static boolean estDansFichier(ImageOnMap plugin, int id) {
         Set<String> cle = plugin.getCustomConfig().getKeys(false);
         for (String s : cle) {
-            if ((plugin.getCustomConfig().getStringList(s).size() >= 3) && (Short.parseShort((String) plugin.getCustomConfig().getStringList(s).get(0)) == id)) {
+            if ((plugin.getCustomConfig().getStringList(s).size() >= 3) && (Integer.parseInt(plugin.getCustomConfig().getStringList(s).get(0)) == id)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean estDansFichier(ImageOnMap plugin, short id, String pseudo) {
+    public static boolean estDansFichier(ImageOnMap plugin, int id, String pseudo) {
         Set<String> cle = plugin.getCustomConfig().getKeys(false);
         for (String s : cle) {
-            if ((plugin.getCustomConfig().getStringList(s).size() >= 3) && (Short.parseShort((String) plugin.getCustomConfig().getStringList(s).get(0)) == id) && (((String) plugin.getCustomConfig().getStringList(s).get(2)).contentEquals(pseudo))) {
+            if ((plugin.getCustomConfig().getStringList(s).size() >= 3) && (Integer.parseInt(plugin.getCustomConfig().getStringList(s).get(0)) == id) && ((plugin.getCustomConfig().getStringList(s).get(2)).contentEquals(pseudo))) {
                 return true;
             }
         }
@@ -106,39 +107,36 @@ public class ImgUtility {
         int i = 0;
         for (String s : cle) {
             if (plugin.getConfig().getStringList(s).size() >= 3) {
-                ArrayList<String> liste = new ArrayList();
+                List<String> liste = new ArrayList<>();
                 liste.add(String.valueOf(plugin.getConfig().getStringList(s).get(0)));
-                liste.add((String) plugin.getConfig().getStringList(s).get(1));
-                liste.add((String) plugin.getConfig().getStringList(s).get(2));
-                plugin.getCustomConfig().set((String) plugin.getConfig().getStringList(s).get(1), liste);
+                liste.add(plugin.getConfig().getStringList(s).get(1));
+                liste.add(plugin.getConfig().getStringList(s).get(2));
+                plugin.getCustomConfig().set(plugin.getConfig().getStringList(s).get(1), liste);
                 plugin.getConfig().set(s, null);
                 i++;
             }
         }
         plugin.getLogger().info("Importing finished. " + i + "maps were imported");
-        plugin.getConfig().set("import-maps", Boolean.valueOf(false));
+        plugin.getConfig().set("import-maps", false);
         plugin.saveConfig();
         plugin.saveCustomConfig();
         return true;
     }
 
-    static MapView getMap(ImageOnMap plugin, short id) {
-        if (!estDansFichier(plugin, id)) {
-            return null;
-        }
+    static MapView getMap(ImageOnMap plugin, int id) {
         MapView map = Bukkit.getMap(id);
-        if (map == null) {
+        if (map == null && estDansFichier(plugin, id)) {
             plugin.getLogger().warning("Map#" + id + " exists in maps.yml but not in the world folder !");
             return null;
         }
         return map;
     }
 
-    static boolean removeMap(ImageOnMap plugin, short id) {
+    static boolean removeMap(ImageOnMap plugin, int id) {
         if(plugin.getCustomConfig().contains("map" + id)) {
             MapView carte = Bukkit.getMap(id);
 
-            if (carte == null)
+            if (carte != null)
                 ImageRendererThread.emptyRenderers(carte);
 
             plugin.getCustomConfig().set("map" + id, null);
@@ -155,21 +153,21 @@ public class ImgUtility {
         return false;
     }
 
-    static ArrayList<String> getListMapByPlayer(ImageOnMap plugin, String pseudo) {
-        ArrayList<String> listeMap = new ArrayList();
+    static List<String> getListMapByPlayer(ImageOnMap plugin, String pseudo) {
+        List<String> listeMap = new ArrayList<>();
         Set<String> cle = plugin.getCustomConfig().getKeys(false);
         for (String s : cle) {
-            if ((plugin.getCustomConfig().getStringList(s).size() >= 3) && (pseudo.equalsIgnoreCase((String) plugin.getCustomConfig().getStringList(s).get(2)))) {
-                listeMap.add((String) plugin.getCustomConfig().getStringList(s).get(0));
+            if ((plugin.getCustomConfig().getStringList(s).size() >= 3) && (pseudo.equalsIgnoreCase(plugin.getCustomConfig().getStringList(s).get(2)))) {
+                listeMap.add(plugin.getCustomConfig().getStringList(s).get(0));
             }
         }
         return listeMap;
     }
 
-    static void addMap(ItemStack map, Inventory inv, ArrayList<ItemStack> restant) {
-        HashMap<Integer, ItemStack> reste = inv.addItem(new ItemStack[]{map});
+    static void addMap(ItemStack map, Inventory inv, List<ItemStack> restant) {
+        Map<Integer, ItemStack> reste = inv.addItem(map);
         if (!reste.isEmpty()) {
-            restant.add((ItemStack) reste.get(Integer.valueOf(0)));
+            restant.add(reste.get(0));
         }
     }
 }
