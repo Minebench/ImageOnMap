@@ -5,21 +5,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import javax.imageio.ImageIO;
 
 import org.bukkit.Bukkit;
 import org.bukkit.map.MapPalette;
-import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
 public class SavedMap {
+    private File file;
     private ImageOnMap plugin;
     private String nomImg;
     private String nomJoueur = "";
     private String nomMonde = "";
     private int idMap;
-    private BufferedImage image;
+    private BufferedImage image = null;
 
     SavedMap(ImageOnMap plug, String nomJ, int id, BufferedImage img, String nomM) {
         this.plugin = plug;
@@ -28,26 +27,21 @@ public class SavedMap {
         this.image = img;
         this.nomImg = "map" + id;
         this.nomMonde = nomM;
+        this.file = new File(this.plugin.getDataFolder() + File.separator + "Image", this.nomImg + ".png");
     }
 
     SavedMap(ImageOnMap plug, int id) {
         this.idMap = id;
         this.plugin = plug;
-        boolean found = false;
         this.nomImg = "map" + id;
         List<String> mapdata = this.plugin.getCustomConfig().getStringList(this.nomImg);
         if(mapdata.size() >= 3 && Integer.valueOf(mapdata.get(0)) == id) {
             this.nomJoueur = mapdata.get(2);
             this.nomMonde = mapdata.get(3);
         }
-        try {
-            this.image = ImageIO.read(new File(this.plugin.getDataFolder() + File.separator + "Image", this.nomImg + ".png"));
-            found = true;
-        } catch (IOException e) {
+        this.file = new File(this.plugin.getDataFolder() + File.separator + "Image", this.nomImg + ".png");
+        if (!file.exists()) {
             System.out.println("Image " + this.nomImg + ".png doesn't exists in Image directory.");
-        }
-        if (!found) {
-            System.out.println("No map with the id " + id + " could be loaded");
         }
     }
 
@@ -55,7 +49,11 @@ public class SavedMap {
         this.plugin.getLogger().info("Saving map " + this.idMap);
         try {
             File outputfile = new File(this.plugin.getDataFolder() + File.separator + "Image", this.nomImg + ".png");
-            ImageIO.write(MapPalette.resizeImage(this.image), "png", outputfile);
+            if (image != null) {
+                ImageIO.write(MapPalette.resizeImage(this.image), "png", outputfile);
+            } else if (!outputfile.exists()) {
+                System.out.println("Could not save image " + this.nomImg + ".png as we don't have any image information.");
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -74,7 +72,7 @@ public class SavedMap {
         MapView carte = Bukkit.getMap(this.idMap);
         if (carte != null) {
             ImageRendererThread.emptyRenderers(carte);
-            carte.addRenderer(new Renderer(this.image));
+            carte.addRenderer(new Renderer(this.idMap, this.file));
             return true;
         }
         return false;

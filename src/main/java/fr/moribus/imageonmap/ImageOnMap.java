@@ -50,7 +50,6 @@ public final class ImageOnMap extends JavaPlugin {
     }
 
     public void loadMaps() {
-        Set<String> cle = getCustomConfig().getKeys(false);
         int nbMap = 0;
         int nbErr = 0;
         File dir = new File(getDataFolder(),"Image");

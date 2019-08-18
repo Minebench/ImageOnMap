@@ -59,7 +59,7 @@ public class TacheTraitementMap extends BukkitRunnable {
                     map = Bukkit.createMap(Bukkit.getServer().getWorlds().get(0));
                 }
                 ImageRendererThread.emptyRenderers(map);
-                map.addRenderer(new Renderer(this.imageRendering.getImg()[i]));
+                map.addRenderer(new Renderer(map.getId(), this.imageRendering.getImg()[i]));
                 this.map = new ItemStack(Material.FILLED_MAP);
                 MapMeta meta = (MapMeta) this.map.getItemMeta();
                 meta.setMapView(map);
