@@ -37,6 +37,10 @@ public class MapToolCommand implements CommandExecutor {
         }
         int id;
         if (arg3[0].equalsIgnoreCase("get")) {
+            if (!player.hasPermission("imageonmap.maptool.get")) {
+                player.sendMessage("You are not allowed to get maps!");
+                return true;
+            }
             try {
                 id = Integer.parseInt(arg3[1]);
             } catch (NumberFormatException err) {
@@ -65,10 +69,9 @@ public class MapToolCommand implements CommandExecutor {
             player.sendMessage("Map " + ChatColor.ITALIC + id + ChatColor.RESET + " was added to your inventory.");
 
             return true;
-        }
-        if (arg3[0].equalsIgnoreCase("delete")) {
-            if (!player.hasPermission("imageonmap.usermmap")) {
-                player.sendMessage("You are not allowed to delete map !");
+        } else if (arg3[0].equalsIgnoreCase("delete")) {
+            if (!player.hasPermission("imageonmap.maptool.delete")) {
+                player.sendMessage("You are not allowed to delete maps!");
                 return true;
             }
             if (arg3.length <= 1) {
@@ -82,7 +85,7 @@ public class MapToolCommand implements CommandExecutor {
                 try {
                     id = Integer.parseInt(arg3[1]);
                 } catch (NumberFormatException err) {
-                    player.sendMessage("you must enter a number !");
+                    player.sendMessage("you must enter a number!");
                     return true;
                 }
             }
@@ -92,12 +95,19 @@ public class MapToolCommand implements CommandExecutor {
             }
             player.sendMessage(ChatColor.RED + "Can't delete Map#" + id + ": check the server log");
             return true;
-        }
-        if (arg3[0].equalsIgnoreCase("list")) {
+        } else if (arg3[0].equalsIgnoreCase("list")) {
+            if (!player.hasPermission("imageonmap.maptool.list")) {
+                player.sendMessage("You are not allowed list maps!");
+                return true;
+            }
             List<String> liste = ImgUtility.getListMapByPlayer(this.plugin, player.getName());
             player.sendMessage(String.join(" ", liste) +
                     "\nYou have rendered " + ChatColor.DARK_PURPLE + liste.size() + ChatColor.RESET + " pictures");
         } else if (arg3[0].equalsIgnoreCase("getrest")) {
+            if (!player.hasPermission("imageonmap.maptool.get")) {
+                player.sendMessage("You are not allowed to get maps!");
+                return true;
+            }
             if (this.plugin.getRemainingMaps(player.getName()) == null) {
                 player.sendMessage("All maps have already be placed in your inventory");
                 return true;

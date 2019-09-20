@@ -8,10 +8,24 @@ commands:
    tomap:
       description: render an image in a map
       usage: /<command> [URL]
+      permission: 'imageonmap.userender'
    maptool:
       description: manage maps
       usage: /<command>
+      permission: 'imageonmap.maptool'
 permissions:
     imageonmap.userender:
         description: Allows you to use /tomap
+        default: op
+    imageonmap.maptool:
+        description: Allows you to use /maptool
+        default: op
+    imageonmap.maptool.get:
+        description: Allows you to use /maptool get
+        default: op
+    imageonmap.maptool.delete:
+        description: Allows you to use /maptool delete
+        default: op
+    imageonmap.maptool.list:
+        description: Allows you to use /maptool list
         default: op
