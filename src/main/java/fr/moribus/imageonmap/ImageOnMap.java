@@ -10,15 +10,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.apache.commons.imaging.palette.Palette;
-import org.apache.commons.imaging.palette.SimplePalette;
+import com.waywardcode.dither.Atkinson;
+import com.waywardcode.dither.Ditherer;
+import com.waywardcode.dither.FloydSteinberg;
+import com.waywardcode.dither.JarvisJudiceNinke;
+import com.waywardcode.dither.NaiveDither;
+import com.waywardcode.dither.Sierra24A;
+import com.waywardcode.dither.Sierra3;
+import com.waywardcode.dither.Stucki;
+import com.waywardcode.dither.colors.ColorMetric;
+import com.waywardcode.dither.colors.ColorSelectionFactory;
+import com.waywardcode.dither.colors.ColorSelector;
+import com.waywardcode.dither.colors.NaiveMetric;
+import com.waywardcode.dither.colors.RGBLumosityMetric;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.map.MapPalette;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class ImageOnMap extends JavaPlugin {
-    public static Palette PALETTE = new SimplePalette(new int[0]);
+    public static Ditherer DITHERER = null;
     int test = 0;
     File dossier;
     boolean dossierCree;
@@ -26,13 +41,10 @@ public final class ImageOnMap extends JavaPlugin {
     private File customConfigFile = null;
     private HashMap<String, List<ItemStack>> cache = new HashMap<>();
 
-    public void onLoad() {
-    }
-
     public void onEnable() {
         this.dossierCree = ImgUtility.creeRepImg(this);
 
-        ImgUtility.creeSectionConfig(this);
+        loadConfig();
         if (this.getConfig().get("map_path") == null) {
             this.getConfig().set("map_path", this.getServer().getWorlds().get(0).getName());
         } else if (this.getConfig().get("map_path") != this.getServer().getWorlds().get(0).getName()) {
@@ -40,9 +52,6 @@ public final class ImageOnMap extends JavaPlugin {
         }
         if (this.getConfig().getBoolean("import-maps")) {
             ImgUtility.importerConfig(this);
-        }
-        if (this.getConfig().getBoolean("image-dithering")) {
-            PALETTE = new ImageMapPalette();
         }
         if (this.dossierCree) {
             this.getCommand("tomap").setExecutor(new ImageRenderCommand(this));
@@ -53,6 +62,55 @@ public final class ImageOnMap extends JavaPlugin {
         } else {
             this.getLogger().info("An isErroring occured ! Unable to create Image folder. Plugin will NOT work !");
             this.setEnabled(false);
+        }
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length > 0) {
+            if ("reload".equalsIgnoreCase(args[0])) {
+                loadConfig();
+                sender.sendMessage(ChatColor.YELLOW + "Config reloaded!");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void loadConfig() {
+        reloadConfig();
+        ImgUtility.creeSectionConfig(this);
+        try {
+            Field colorsField = MapPalette.class.getDeclaredField("colors");
+            colorsField.setAccessible(true);
+            Color[] colors = (Color[]) colorsField.get(null);
+            javafx.scene.paint.Color[] fxColors = new javafx.scene.paint.Color[colors.length];
+            for (int i = 0; i < fxColors.length; i++) {
+                fxColors[i] = javafx.scene.paint.Color.color(
+                        colors[i].getRed() / 256.0,
+                        colors[i].getGreen() / 256.0,
+                        colors[i].getBlue() / 256.0
+                );
+            }
+            ColorMetric cm;
+            switch (this.getConfig().getString("image-dithering.metric")) {
+                case "rgblumin":    cm = new RGBLumosityMetric(); break;
+                default:            cm = new NaiveMetric(); break;
+            }
+
+            ColorSelector selector = ColorSelectionFactory.getInstance(fxColors, cm);
+            switch (this.getConfig().getString("image-dithering.type").toLowerCase()) {
+                case "atkinson":        DITHERER = new Atkinson(selector); break;
+                case "floyd steinberg": DITHERER = new FloydSteinberg(selector); break;
+                case "jarvis":          DITHERER = new JarvisJudiceNinke(selector); break;
+                case "stucki":          DITHERER = new Stucki(selector); break;
+                case "sierra 3":        DITHERER = new Sierra3(selector); break;
+                case "sierra 2-4a":     DITHERER = new Sierra24A(selector); break;
+                default:                DITHERER = new NaiveDither(selector); break;
+            }
+            getLogger().info("Using " + DITHERER.toString() + " as image ditherer");
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 

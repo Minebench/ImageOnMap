@@ -13,6 +13,10 @@ commands:
       description: manage maps
       usage: /<command>
       permission: 'imageonmap.maptool'
+   imageonmap:
+      description: main plugin command
+      usage: /<command> [reload]
+      permission: 'imageonmap.command'
 permissions:
     imageonmap.userender:
         description: Allows you to use /tomap

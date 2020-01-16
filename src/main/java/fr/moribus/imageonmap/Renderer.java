@@ -1,12 +1,10 @@
 package fr.moribus.imageonmap;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.imaging.ImageWriteException;
-import org.apache.commons.imaging.palette.Dithering;
+import javafx.embed.swing.SwingFXUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
@@ -29,13 +27,8 @@ public class Renderer extends MapRenderer implements Runnable {
     }
 
     private void dither() {
-        if (ImageOnMap.PALETTE.length() > 0) {
-            try {
-                Dithering.applyFloydSteinbergDithering(touhou, ImageOnMap.PALETTE);
-            } catch (ImageWriteException e) {
-                System.out.println("Unable to dither Image " + file.getName() + " for map " + id + ".");
-                e.printStackTrace();
-            }
+        if (ImageOnMap.DITHERER != null) {
+            SwingFXUtils.fromFXImage(ImageOnMap.DITHERER.dither(SwingFXUtils.toFXImage(touhou, null)), touhou);
         }
     }
 

@@ -19,6 +19,10 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>minebench-repo</id>
+            <url>https://repo.minebench.de/</url>
+        </repository>
     </repositories>
     <dependencies>
         <!-- Dependency information --> 
@@ -30,9 +34,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-imaging</artifactId>
-            <version>1.0-alpha1</version>
+            <groupId>com.waywardcode</groupId>
+            <artifactId>dither</artifactId>
+            <version>1.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
@@ -78,8 +82,8 @@
                     <minimizeJar>true</minimizeJar>
                     <relocations>
                         <relocation>
-                            <pattern>org.apache</pattern>
-                            <shadedPattern>fr.moribus.imageonmap.libs.apache</shadedPattern>
+                            <pattern>com.waywardcode.dither</pattern>
+                            <shadedPattern>fr.moribus.imageonmap.ditherlib</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
