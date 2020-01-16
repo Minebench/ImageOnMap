@@ -10,19 +10,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
-import com.waywardcode.dither.Atkinson;
-import com.waywardcode.dither.Ditherer;
-import com.waywardcode.dither.FloydSteinberg;
-import com.waywardcode.dither.JarvisJudiceNinke;
-import com.waywardcode.dither.NaiveDither;
-import com.waywardcode.dither.Sierra24A;
-import com.waywardcode.dither.Sierra3;
-import com.waywardcode.dither.Stucki;
-import com.waywardcode.dither.colors.ColorMetric;
-import com.waywardcode.dither.colors.ColorSelectionFactory;
-import com.waywardcode.dither.colors.ColorSelector;
-import com.waywardcode.dither.colors.NaiveMetric;
-import com.waywardcode.dither.colors.RGBLumosityMetric;
+import fr.moribus.imageonmap.ditherlib.Atkinson;
+import fr.moribus.imageonmap.ditherlib.Ditherer;
+import fr.moribus.imageonmap.ditherlib.FloydSteinberg;
+import fr.moribus.imageonmap.ditherlib.JarvisJudiceNinke;
+import fr.moribus.imageonmap.ditherlib.NaiveDither;
+import fr.moribus.imageonmap.ditherlib.Sierra24A;
+import fr.moribus.imageonmap.ditherlib.Sierra3;
+import fr.moribus.imageonmap.ditherlib.Stucki;
+import fr.moribus.imageonmap.ditherlib.colors.ColorMetric;
+import fr.moribus.imageonmap.ditherlib.colors.ColorSelectionFactory;
+import fr.moribus.imageonmap.ditherlib.colors.ColorSelector;
+import fr.moribus.imageonmap.ditherlib.colors.NaiveMetric;
+import fr.moribus.imageonmap.ditherlib.colors.RGBLumosityMetric;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -84,14 +84,6 @@ public final class ImageOnMap extends JavaPlugin {
             Field colorsField = MapPalette.class.getDeclaredField("colors");
             colorsField.setAccessible(true);
             Color[] colors = (Color[]) colorsField.get(null);
-            javafx.scene.paint.Color[] fxColors = new javafx.scene.paint.Color[colors.length];
-            for (int i = 0; i < fxColors.length; i++) {
-                fxColors[i] = javafx.scene.paint.Color.color(
-                        colors[i].getRed() / 256.0,
-                        colors[i].getGreen() / 256.0,
-                        colors[i].getBlue() / 256.0
-                );
-            }
             ColorMetric cm;
             switch (this.getConfig().getString("image-dithering.metric")) {
                 case "rgblumin":    cm = new RGBLumosityMetric(); break;
@@ -101,15 +93,15 @@ public final class ImageOnMap extends JavaPlugin {
                     double r = c1.getRed() - c2.getRed();
                     double g = c1.getGreen() - c2.getGreen();
                     double b = c1.getBlue() - c2.getBlue();
-                    double weightR = 2.0D + rmean;
+                    double weightR = 2.0D + rmean / 256.0D;
                     double weightG = 4.0D;
-                    double weightB = 2.0D - rmean;
+                    double weightB = 2.0D - (255 - rmean) / 256.0D;
                     return weightR * r * r + weightG * g * g + weightB * b * b;
                 }; break;
                 default:            cm = new NaiveMetric(); break;
             }
 
-            ColorSelector selector = ColorSelectionFactory.getInstance(fxColors, cm);
+            ColorSelector selector = ColorSelectionFactory.getInstance(colors, cm);
             switch (this.getConfig().getString("image-dithering.type").toLowerCase()) {
                 case "atkinson":        DITHERER = new Atkinson(selector); break;
                 case "floyd steinberg": DITHERER = new FloydSteinberg(selector); break;

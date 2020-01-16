@@ -74,28 +74,5 @@
                 <directory>${project.basedir}/src/main/resources</directory>
             </resource>
         </resources>
-        <plugins>
-            <plugin>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <minimizeJar>true</minimizeJar>
-                    <relocations>
-                        <relocation>
-                            <pattern>com.waywardcode.dither</pattern>
-                            <shadedPattern>fr.moribus.imageonmap.ditherlib</shadedPattern>
-                        </relocation>
-                    </relocations>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 </project>

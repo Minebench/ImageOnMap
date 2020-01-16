@@ -3,8 +3,7 @@ package fr.moribus.imageonmap;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
-import javafx.embed.swing.SwingFXUtils;
+;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
@@ -28,7 +27,7 @@ public class Renderer extends MapRenderer implements Runnable {
 
     private void dither() {
         if (ImageOnMap.DITHERER != null) {
-            SwingFXUtils.fromFXImage(ImageOnMap.DITHERER.dither(SwingFXUtils.toFXImage(touhou, null)), touhou);
+            touhou = ImageOnMap.DITHERER.dither(touhou);
         }
     }
 
