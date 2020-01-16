@@ -95,6 +95,17 @@ public final class ImageOnMap extends JavaPlugin {
             ColorMetric cm;
             switch (this.getConfig().getString("image-dithering.metric")) {
                 case "rgblumin":    cm = new RGBLumosityMetric(); break;
+                case "bukkit":      cm = (c1, c2) -> {
+                    // From private MapPalette#getDistance method
+                    double rmean = (c1.getRed() + c2.getRed()) / 2.0D;
+                    double r = c1.getRed() - c2.getRed();
+                    double g = c1.getGreen() - c2.getGreen();
+                    double b = c1.getBlue() - c2.getBlue();
+                    double weightR = 2.0D + rmean;
+                    double weightG = 4.0D;
+                    double weightB = 2.0D - rmean;
+                    return weightR * r * r + weightG * g * g + weightB * b * b;
+                }; break;
                 default:            cm = new NaiveMetric(); break;
             }
 
