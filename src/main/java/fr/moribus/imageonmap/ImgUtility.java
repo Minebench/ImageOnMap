@@ -55,6 +55,9 @@ public class ImgUtility {
         if (plugin.getConfig().get("import-maps") == null) {
             plugin.getConfig().set("import-maps", true);
         }
+        if (plugin.getConfig().get("image-dithering") == null) {
+            plugin.getConfig().set("image-dithering", true);
+        }
         plugin.saveConfig();
     }
 

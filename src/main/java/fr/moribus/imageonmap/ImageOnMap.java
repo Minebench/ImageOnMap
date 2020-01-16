@@ -1,20 +1,24 @@
 package fr.moribus.imageonmap;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 
+import org.apache.commons.imaging.palette.Palette;
+import org.apache.commons.imaging.palette.SimplePalette;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class ImageOnMap extends JavaPlugin {
+    public static Palette PALETTE = new SimplePalette(new int[0]);
     int test = 0;
     File dossier;
     boolean dossierCree;
@@ -36,6 +40,9 @@ public final class ImageOnMap extends JavaPlugin {
         }
         if (this.getConfig().getBoolean("import-maps")) {
             ImgUtility.importerConfig(this);
+        }
+        if (this.getConfig().getBoolean("image-dithering")) {
+            PALETTE = new ImageMapPalette();
         }
         if (this.dossierCree) {
             this.getCommand("tomap").setExecutor(new ImageRenderCommand(this));

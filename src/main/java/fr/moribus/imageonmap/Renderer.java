@@ -1,9 +1,12 @@
 package fr.moribus.imageonmap;
 
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.imaging.ImageWriteException;
+import org.apache.commons.imaging.palette.Dithering;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
@@ -17,11 +20,23 @@ public class Renderer extends MapRenderer implements Runnable {
     private boolean estRendu = false;
     private File file = null;
     private final int id;
-    private Image touhou = null;
+    private BufferedImage touhou = null;
 
-    public Renderer(int id, Image img) {
+    public Renderer(int id, BufferedImage img) {
         this.id = id;
         this.touhou = img;
+        dither();
+    }
+
+    private void dither() {
+        if (ImageOnMap.PALETTE.length() > 0) {
+            try {
+                Dithering.applyFloydSteinbergDithering(touhou, ImageOnMap.PALETTE);
+            } catch (ImageWriteException e) {
+                System.out.println("Unable to dither Image " + file.getName() + " for map " + id + ".");
+                e.printStackTrace();
+            }
+        }
     }
 
     public Renderer(int id, File file) {
@@ -41,6 +56,7 @@ public class Renderer extends MapRenderer implements Runnable {
         if (touhou == null && file != null && file.exists()) {
             try {
                 touhou = ImageIO.read(file);
+                dither();
             } catch (IOException e) {
                 System.out.println("Unable to read Image " + file.getName() + " for map " + id + ".");
                 e.printStackTrace();
