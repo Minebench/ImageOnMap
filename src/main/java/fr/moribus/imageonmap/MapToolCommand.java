@@ -43,7 +43,7 @@ public class MapToolCommand implements CommandExecutor {
             }
             try {
                 id = Integer.parseInt(arg3[1]);
-            } catch (NumberFormatException err) {
+            } catch (ArrayIndexOutOfBoundsException | NumberFormatException err) {
                 player.sendMessage("you must enter a number !");
                 return true;
             }
